@@ -1,0 +1,55 @@
+org: spotcloud
+app: test-serverless
+
+service: pythonprojects
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  role: arn:aws:iam::915836852093:role/serverless-role
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    name: diego
+
+functions:
+  exercise1:
+    handler: functions/main.handler
+    timeout: 29
+    memorysize: 128
+    events:
+      - http:
+          path: /exercise1
+          method: get
+
+  exercise2:
+      handler: functions/main.handler
+      timeout: 29
+      memorysize: 128
+      events:
+        - http:
+            path: /exercise2
+            method: get
+
+  exercise3:
+    handler: functions/main.handler
+    timeout: 29
+    memorysize: 128
+    events:
+      - http:
+          path: /exercise3
+          method: get
+
+package:
+  exclude:
+    - node_modules/**
+
+plugins:
+  - serverless-python-requirements
+  - serverless-prune-plugin
+
+prune:
+    automatic: true
+    number: 3

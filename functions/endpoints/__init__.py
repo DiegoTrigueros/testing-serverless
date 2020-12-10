@@ -1,0 +1,4 @@
+from functions.endpoints.exercise1 import first_function
+from functions.endpoints.exercise2 import second_function
+from functions.endpoints import DataPreparation
+from functions.endpoints.exercise3 import third_function

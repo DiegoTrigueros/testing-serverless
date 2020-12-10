@@ -1,0 +1,6 @@
+pymongo[tls]
+python-dateutil
+pytz
+requests
+bson
+lambda-decorators
