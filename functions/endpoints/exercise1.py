@@ -36,29 +36,32 @@ def first_function(headers) -> dict:
         ]
 
         data = conn.entrances.aggregate(pipeline)
+        if data is not None:
+            response = {
+                "female": 0,
+                "male": 0,
+                "total_visits": 0,
+                "highest_temperature": 0
+            }
 
-        male_visits = 0
-        female_visits = 0
-        max_temperature = 0
-        for d in data:
-            if d['_id'] == 'male':
-                male_visits = d['total_visits']
-            else:
-                female_visits = d['total_visits']
+            temperatures_set = set()
+            for d in data:
+                response[d['_id']] += d['total_visits']
+                response['total_visits'] += d['total_visits']
 
-            if d['highest_temperature'] > max_temperature:
-                max_temperature = d['highest_temperature']
+                temperatures_set.add(d['highest_temperature'])
 
-        total_visits = female_visits + male_visits
-        response = {
-            "female_visits": female_visits,
-            "male_visits": male_visits,
-            "total_visits": total_visits,
-            "highest_temperature": max_temperature
-        }
+            response['highest_temperature'] = max(temperatures_set)
+
+            return Response.success_message(200, response).result
+        else:
+            response = {
+                "error": 404
+            }
+            return Response.success_message(200, response).result
     else:
-        response = {
-            "error": 404
-        }
+        return Response.fail_message(404, {"message": "headers do not "
+                                                      "contain needed data"})
 
-    return Response.success_message(200, response).result
+
+

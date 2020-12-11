@@ -36,20 +36,21 @@ def third_function(headers):
         ]
 
         data = conn.stores.aggregate(pipeline)
-        nearest = {}
 
-        for d in data:
-            nearest = d
-            break
+        if data is not None:
+            for d in data:
+                message = {
+                    "nearest_store_id": d['_id'],
+                    "nearest_store_name": d['name'],
+                    "distance": d['distance']
+                }
 
-        message = {
-            "nearest_store_id": nearest['_id'],
-            "nearest_store_name": nearest['name'],
-            "distance": nearest['distance']
-        }
-    else:
-        message = {
-            "error": 404
-        }
+                return Response.success_message(200, message).result
+        else:
+            message = {
+                "error": 404
+            }
+            return Response.fail_message(404, message).result
 
-    return Response.success_message(200, message).result
+    return Response.fail_message(404, {"message": "headers do not "
+                                                  "contain needed data"})

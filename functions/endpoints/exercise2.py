@@ -6,6 +6,24 @@ from functions.endpoints.DataPreparation import prepare_data
 conn = Connection.get_instance()
 
 
+def get_weekday_name(week_number: int) -> str:
+    days = {
+        1: "monday",
+        2: "tuesday",
+        3: "wednesday",
+        4: "thursday",
+        5: "friday",
+        6: "saturday",
+        7: "sunday"
+    }
+
+    return days[week_number]
+
+
+def get_formatted_date(hour: str) -> str:
+    return f"{hour}:00 - {hour}:59"
+
+
 def second_function(headers) -> dict:
     if ("enterprise" in headers) and ("store" in headers) \
             and ("timezone" in headers) and ("date_range" in headers):
@@ -40,20 +58,38 @@ def second_function(headers) -> dict:
         ]
 
         data = conn.entrances.aggregate(pipeline)
+        result = dict()
 
-        for d in data:
-            index = d['_id']
-            weekday = index['weekday']
-            gender = index['gender']
-            hour = index['hour']
-
-        response = {
-            "message": "successful"
-        }
-    else:
-        response = {
-            "message": "404"
-        }
-
-    return Response.success_message(200, response).result
+        if data is not None:
+            for d in data:
+                day_of_week = d['_id']['weekday']
+                hour = str(d['_id']['hour']).zfill(2)
+                gender = d['_id']['gender']
+                visitors = d['visitors']
+                weekday_name = get_weekday_name(day_of_week)
+                if weekday_name not in result:
+                    result[weekday_name] = {
+                        "total": {
+                            "male": 0,
+                            "female": 0
+                        },
+                        "hourly": {
+                            get_formatted_date(hour): {
+                                "male": 0,
+                                "female": 0
+                            } for _ in range(0, 24)
+                        }
+                    }
+                    print(result[weekday_name])
+                    result[weekday_name]["total"][gender] += visitors
+                    result[weekday_name]["hourly"][get_formatted_date(hour)][
+                        gender] += \
+                        visitors
+                else:
+                    result[weekday_name]["total"][gender] += visitors
+                    result[weekday_name]["hourly"][get_formatted_date(hour)][
+                        gender] += visitors
+                break
+            return Response.success_message(200, result)
+        return Response.fail_message(404, {"message": "no data found"})
 
