@@ -73,23 +73,24 @@ def second_function(headers) -> dict:
                             "male": 0,
                             "female": 0
                         },
-                        "hourly": {
-                            get_formatted_date(hour): {
-                                "male": 0,
-                                "female": 0
-                            } for _ in range(0, 24)
-                        }
+                        "hourly": {f"{str(i).zfill(2)}:00 -"
+                                   f" {str(i).zfill(2)}:59": {
+                                    "male": 0,
+                                    "female": 0
+                                    }
+                                   for i in
+                                   range(0, 24)}
                     }
+                    print(weekday_name)
                     print(result[weekday_name])
                     result[weekday_name]["total"][gender] += visitors
-                    result[weekday_name]["hourly"][get_formatted_date(hour)][
+                    result[weekday_name]["hourly"][f"{hour}:00 - {hour}:59"][
                         gender] += \
                         visitors
                 else:
                     result[weekday_name]["total"][gender] += visitors
-                    result[weekday_name]["hourly"][get_formatted_date(hour)][
+                    result[weekday_name]["hourly"][f"{hour}:00 - {hour}:59"][
                         gender] += visitors
-                break
-            return Response.success_message(200, result)
-        return Response.fail_message(404, {"message": "no data found"})
+            return Response.success_message(200, result).result
+        return Response.fail_message(404, {"message": "no data found"}).result
 
